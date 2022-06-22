@@ -14,7 +14,7 @@ class ProductoItem extends StatelessWidget {
         child: Container(
             width: MediaQuery.of(context).size.width - 20,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(30),
             ),
             child: productWidget(context)),

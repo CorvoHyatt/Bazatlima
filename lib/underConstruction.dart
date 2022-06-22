@@ -22,7 +22,7 @@ class _UnderConstructionState extends State<UnderConstruction> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: const [
           Padding(
             padding: EdgeInsets.only(bottom: 20),
             child: Center(
@@ -34,7 +34,7 @@ class _UnderConstructionState extends State<UnderConstruction> {
           ),
           Center(
             child: Text(
-              widget.usuario!.nombreUsuario!,
+              "En construcción",
               style: TextStyle(
                   backgroundColor: Colors.amber,
                   fontSize: 30,

@@ -4,6 +4,7 @@ import 'package:bazatlima/Models/usuario_model.dart';
 import 'package:bazatlima/rootApp.dart';
 import 'package:flutter/material.dart';
 import 'package:bazatlima/signUpPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 
 import 'api_service.dart';
@@ -22,23 +23,14 @@ class StartState extends State<LoginPage> {
   String? password;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return initWidget();
   }
-
-  // Widget existe() {
-  //   return FutureBuilder(
-  //     future: APIService.exist(correo, password),
-  //     builder:
-  //         (BuildContext context, AsyncSnapshot<UsuarioModel?> usuarioVendedor) {
-  //       if (usuarioVendedor.data != -1) {
-  //         // RootPage
-  //       }
-  //       return const Center(
-  //           child: CircularProgressIndicator(color: Colors.white));
-  //     },
-  //   );
-  // }
 
   initWidget() {
     return Scaffold(
@@ -96,7 +88,7 @@ class StartState extends State<LoginPage> {
             },
                 isMultiline: false,
                 multilineRows: 1,
-                initialValue: "prueba",
+                initialValue: "corvohyatt@gmail.com",
                 borderColor: Colors.black,
                 borderFocusColor: Colors.black,
                 textColor: Colors.black,
@@ -142,11 +134,12 @@ class StartState extends State<LoginPage> {
               width: 300,
               fontSize: 20, () async {
             if (validateAndSave()) {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
               APIService.exist(correo, password).then((response) {
-                print("Response: $response");
                 if (response != -1) {
-                  Navigator.popAndPushNamed(context, "/rootApp",
-                      arguments: {'usuario': response});
+                  //Guardar en local el id del usuario
+                  prefs.setInt('idUsuario', response.idUsuario);
+                  Navigator.popAndPushNamed(context, "/rootApp");
                 } else {
                   FormHelper.showSimpleAlertDialog(
                       context,

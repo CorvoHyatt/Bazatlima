@@ -3,6 +3,7 @@
 import 'package:bazatlima/Models/usuario_model.dart';
 import 'package:bazatlima/comprador/producto_list.dart';
 import 'package:bazatlima/underConstruction.dart';
+import 'package:bazatlima/usuarioInfo.dart';
 import 'package:bazatlima/vendedor/producto_list_vendedor.dart';
 import 'package:flutter/material.dart';
 
@@ -23,60 +24,19 @@ class RootAppState extends State<RootApp> {
   void initState() {
     super.initState();
     usuario = UsuarioModel();
+
     tabs = [
       ProductList(),
       UnderConstruction(),
       ProductListVendedor(),
       UnderConstruction(),
       UnderConstruction(),
-      UnderConstruction(
-        usuario: usuario,
-      ),
+      UsuarioInfo(),
     ];
-    cargarUsuario();
   }
-
-  void cargarUsuario() async {
-    Future.delayed(Duration.zero, (() {
-      print(ModalRoute.of(context)?.settings.arguments);
-      if (ModalRoute.of(context)?.settings.arguments != null) {
-        final Map arguments = (ModalRoute.of(context)?.settings.arguments)
-            as Map<String, dynamic>;
-        usuario = arguments["usuario"];
-        setState(() {});
-      }
-    }));
-  }
-
-  // Widget userInfo() {
-  //   return FutureBuilder(
-  //     future: Future.delayed(Duration.zero, (() {
-  //       print(ModalRoute.of(context)?.settings.arguments);
-  //       if (ModalRoute.of(context)?.settings.arguments != null) {
-  //         final Map arguments = (ModalRoute.of(context)?.settings.arguments)
-  //             as Map<String, dynamic>;
-  //         usuario = arguments["usuario"];
-  //         setState(() {});
-  //       }
-  //     })),
-  //     builder: (
-  //       BuildContext context,
-  //       AsyncSnapshot<UsuarioModel?> usuario,
-  //     ) {
-  //       print("Carga de usuario${usuario.data}");
-  //       if (usuario.hasData) {
-  //         return cosa();
-  //       }
-  //       return const Center(
-  //         child: CircularProgressIndicator(),
-  //       );
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
-    print(usuario!.correo);
     return Scaffold(
       backgroundColor: (Color.fromARGB(255, 255, 255, 255)),
       bottomNavigationBar: BottomNavigationBar(
@@ -119,9 +79,5 @@ class RootAppState extends State<RootApp> {
       ),
       body: tabs[_currentIndex],
     );
-  }
-
-  Widget cosa() {
-    return Scaffold();
   }
 }

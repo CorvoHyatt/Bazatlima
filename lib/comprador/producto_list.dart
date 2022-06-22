@@ -93,7 +93,7 @@ class _ProductListState extends State<ProductList> {
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[300],
       body: loadProducts(),
     );
   }

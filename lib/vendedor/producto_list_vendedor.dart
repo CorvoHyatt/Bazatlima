@@ -82,7 +82,7 @@ class _ProductListVendedorState extends State<ProductListVendedor> {
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[300],
       body: loadProducts(),
       floatingActionButton: FloatingActionButton(
           onPressed: () {

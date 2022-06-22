@@ -19,7 +19,7 @@ class ProductoItemVendedor extends StatelessWidget {
         child: Container(
             width: MediaQuery.of(context).size.width - 20,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(30),
             ),
             child: productWidgetVendedor(context)),
@@ -86,7 +86,7 @@ class ProductoItemVendedor extends StatelessWidget {
                               color: Colors.black,
                               fontWeight: FontWeight.normal,
                               fontSize: 14),
-                          maxLines: 3,
+                          maxLines: 5,
                           overflow: TextOverflow.fade,
                         ),
                         const SizedBox(
