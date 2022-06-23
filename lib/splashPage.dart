@@ -21,7 +21,7 @@ class StartState extends State<SplashPage> {
   }
 
   startTime() async {
-    var duracion = const Duration(seconds: 3);
+    var duracion = const Duration(seconds: 4);
     return Timer(duracion, route);
   }
 

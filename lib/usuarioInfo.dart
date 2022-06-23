@@ -1,7 +1,10 @@
 import 'package:bazatlima/Models/usuario_model.dart';
 import 'package:bazatlima/api_service.dart';
+import 'package:bazatlima/config.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snippet_coder_utils/FormHelper.dart';
+import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class UsuarioInfo extends StatefulWidget {
   const UsuarioInfo({Key? key}) : super(key: key);
@@ -13,6 +16,7 @@ class UsuarioInfo extends StatefulWidget {
 class _UsuarioInfoState extends State<UsuarioInfo> {
   int? idUsuario;
   UsuarioModel? usuario;
+  int? rate;
   @override
   void initState() {
     super.initState();
@@ -23,7 +27,6 @@ class _UsuarioInfoState extends State<UsuarioInfo> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       idUsuario = prefs.getInt("idUsuario") ?? 0;
-      print("load: $idUsuario");
     });
   }
 
@@ -52,20 +55,6 @@ class _UsuarioInfoState extends State<UsuarioInfo> {
       ),
       backgroundColor: Colors.white,
       body: loadUsuario(context),
-    );
-  }
-
-  Widget loadUsuario(context) {
-    return FutureBuilder(
-      future: APIService.getUsuario(idUsuario),
-      builder: (BuildContext context, AsyncSnapshot<UsuarioModel?> usuario) {
-        if (usuario.hasData) {
-          return usuarioInfo(context, usuario.data);
-        }
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
     );
   }
 
@@ -170,7 +159,6 @@ class _UsuarioInfoState extends State<UsuarioInfo> {
                     Center(
                       child: TextButton(
                         onPressed: () {
-                          print("Click");
                           showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
@@ -196,7 +184,79 @@ class _UsuarioInfoState extends State<UsuarioInfo> {
                                               backgroundColor:
                                                   MaterialStateProperty.all(
                                                       Colors.amber)),
-                                          onPressed: () {},
+                                          onPressed: () async {
+                                            usuario.rol = 1;
+                                            SharedPreferences prefs =
+                                                await SharedPreferences
+                                                    .getInstance();
+
+                                            APIService.updateUsuario(usuario)
+                                                .then((response) {
+                                              if (response) {
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                          actionsAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceAround,
+                                                          title: Icon(
+                                                            Icons.check,
+                                                            color: Colors.green,
+                                                            size: 50,
+                                                          ),
+                                                          actions: [
+                                                            ElevatedButton(
+                                                                style: ButtonStyle(
+                                                                    backgroundColor:
+                                                                        MaterialStateProperty.all(
+                                                                            Colors.amber)),
+                                                                onPressed: () {
+                                                                  prefs.setInt(
+                                                                      'indexMe',
+                                                                      3);
+
+                                                                  Navigator.popUntil(
+                                                                      context,
+                                                                      ModalRoute
+                                                                          .withName(
+                                                                              '/rootApp'));
+                                                                  Navigator
+                                                                      .popAndPushNamed(
+                                                                    context,
+                                                                    '/rootApp',
+                                                                  );
+                                                                },
+                                                                child: Text(
+                                                                  "Ok",
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .black),
+                                                                ))
+                                                          ],
+                                                          content: Text(
+                                                            "Cambio de rol exitoso",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .amber),
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                          ),
+                                                          backgroundColor:
+                                                              Colors.white,
+                                                        ));
+                                              } else {
+                                                FormHelper
+                                                    .showSimpleAlertDialog(
+                                                        context,
+                                                        Config.appName,
+                                                        "Error Ocurred",
+                                                        "Ok", () {
+                                                  Navigator.of(context).pop();
+                                                });
+                                              }
+                                            });
+                                          },
                                           child: Text(
                                             "Cambiar",
                                             style:
@@ -241,8 +301,94 @@ class _UsuarioInfoState extends State<UsuarioInfo> {
                     ),
                   ],
                 ),
+          Padding(
+            padding: EdgeInsets.only(top: 5),
+            child: Center(child: loadCalificacion(context)),
+          )
         ],
       ),
+    );
+  }
+
+  Widget rating(double? rate) {
+    return rate != -1
+        ? Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: SmoothStarRating(
+                  color: Colors.amber,
+                  borderColor: Colors.black,
+                  rating: rate ?? 0,
+                  allowHalfRating: true,
+                  isReadOnly: true,
+                  size: 35,
+                  spacing: 8,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 20),
+                child: Center(
+                  child: Text(
+                    "Rating",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+              )
+            ],
+          )
+        : Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: SmoothStarRating(
+                  color: Colors.amber,
+                  borderColor: Colors.black,
+                  rating: 0,
+                  allowHalfRating: true,
+                  isReadOnly: true,
+                  size: 35,
+                  spacing: 8,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 20),
+                child: Center(
+                  child: Text(
+                    "Aun no tienes una calificación :(",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+              )
+            ],
+          );
+  }
+
+  Widget loadCalificacion(context) {
+    return FutureBuilder(
+      future: APIService.getEstrellas(idUsuario),
+      builder: (BuildContext context, AsyncSnapshot<double?> rate) {
+        if (rate.hasData) {
+          return rating(rate.data);
+        }
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  }
+
+  Widget loadUsuario(context) {
+    return FutureBuilder(
+      future: APIService.getUsuario(idUsuario),
+      builder: (BuildContext context, AsyncSnapshot<UsuarioModel?> usuario) {
+        if (usuario.hasData) {
+          return usuarioInfo(context, usuario.data);
+        }
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

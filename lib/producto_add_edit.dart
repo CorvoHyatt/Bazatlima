@@ -5,6 +5,7 @@ import 'package:bazatlima/Models/categoria_model.dart';
 import 'package:bazatlima/Models/producto_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 
 import 'api_service.dart';
@@ -20,7 +21,7 @@ class ProdductAddEdit extends StatefulWidget {
 }
 
 class _ProdductAddEditState extends State<ProdductAddEdit> {
-  static final GlobalKey<FormState> globalKey = GlobalKey<FormState>();
+  GlobalKey<FormState> globalKey = GlobalKey<FormState>();
   ButtonState state = ButtonState.init;
   List<dynamic> categorias = List<dynamic>.empty(growable: true);
   bool isAPICallProcess = false;
@@ -67,8 +68,11 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 0, 0, 0),
-          title: const Text("Agregar Producto",
-              style: TextStyle(color: Colors.amber)),
+          title: isEditMode != true
+              ? const Text("Agregar Producto",
+                  style: TextStyle(color: Colors.amber))
+              : const Text("Editar Producto",
+                  style: TextStyle(color: Colors.amber)),
         ),
         backgroundColor: Colors.white,
         body: GestureDetector(
@@ -77,10 +81,9 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
             reverse: true,
             child: Column(
               children: [
-                Form(key: globalKey, child: loadCategorias()),
+                Form(key: globalKey, child: productForm()),
                 Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.only(top: 0),
                     width: MediaQuery.of(context).size.width,
                     height: 100,
                     child: buildButton(isLoading, isDone)),
@@ -89,23 +92,6 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget loadCategorias() {
-    return FutureBuilder(
-      future: APIService.getCategorias(),
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<List<CategoriaModel>?> model,
-      ) {
-        if (model.hasData) {
-          return productForm();
-        }
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
     );
   }
 
@@ -141,7 +127,8 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
               }, (onSavedVal) {
                 productoModel!.nombreProducto = onSavedVal;
               },
-                  initialValue: productoModel!.nombreProducto ?? "",
+                  initialValue:
+                      productoModel!.nombreProducto ?? "Producto nuevo",
                   borderColor: Colors.black,
                   borderFocusColor: Colors.black,
                   textColor: Colors.black,
@@ -162,9 +149,10 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
                 productoModel!.precio = int.parse(onSavedVal);
               },
                   initialValue: productoModel!.precio == null
-                      ? ""
+                      ? "4400"
                       : productoModel!.precio.toString(),
                   borderColor: Colors.black,
+                  isNumeric: true,
                   borderFocusColor: Colors.black,
                   textColor: Colors.black,
                   hintColor: Colors.black.withOpacity(.7),
@@ -185,7 +173,8 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
               },
                   isMultiline: true,
                   multilineRows: 3,
-                  initialValue: productoModel!.descripcion ?? "",
+                  initialValue: productoModel!.descripcion ??
+                      "Producto nuevo de buena calidad",
                   borderColor: Colors.black,
                   borderFocusColor: Colors.black,
                   textColor: Colors.black,
@@ -214,10 +203,6 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
                   borderRadius: 10,
                   optionLabel: "categoria",
                   optionValue: "idCategoria")),
-          //  Padding(
-          //     padding: EdgeInsets.only(bottom: 10, top: 10),
-          //     child: FormHelper.submitButton("buttonText", onTap)
-          //   ),
         ],
       ),
     );
@@ -313,7 +298,7 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
         ),
         child: isLoading
             ? Text(
-                "Agregar Producto",
+                isEditMode ? "Editar Producto" : "Agregar Producto",
                 style: TextStyle(
                     fontSize: 24,
                     color: Color.fromARGB(255, 57, 62, 63),
@@ -324,11 +309,46 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
         onPressed: () async {
           if (validateAndSave()) {
             setState((() => state = ButtonState.loading));
+            SharedPreferences prefs = await SharedPreferences.getInstance();
             APIService.saveProducto(productoModel!, isEditMode, isImageSelected)
                 .then((response) {
               if (response) {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, "/", (route) => false);
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          actionsAlignment: MainAxisAlignment.spaceAround,
+                          title: Icon(
+                            Icons.check,
+                            color: Colors.green,
+                            size: 50,
+                          ),
+                          actions: [
+                            ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(
+                                        Colors.amber)),
+                                onPressed: () {
+                                  prefs.setInt('index', 1);
+
+                                  Navigator.popUntil(
+                                      context, ModalRoute.withName('/rootApp'));
+                                  Navigator.popAndPushNamed(
+                                    context,
+                                    '/rootApp',
+                                  );
+                                },
+                                child: Text(
+                                  "Ok",
+                                  style: TextStyle(color: Colors.black),
+                                ))
+                          ],
+                          content: Text(
+                            "Producto agregado con exito",
+                            style: TextStyle(color: Colors.black),
+                            textAlign: TextAlign.center,
+                          ),
+                          backgroundColor: Colors.white,
+                        ));
               } else {
                 FormHelper.showSimpleAlertDialog(
                     context, Config.appName, "Error Ocurred", "Ok", () {

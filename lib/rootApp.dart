@@ -6,6 +6,7 @@ import 'package:bazatlima/underConstruction.dart';
 import 'package:bazatlima/usuarioInfo.dart';
 import 'package:bazatlima/vendedor/producto_list_vendedor.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RootApp extends StatefulWidget {
   const RootApp({Key? key}) : super(key: key);
@@ -24,15 +25,27 @@ class RootAppState extends State<RootApp> {
   void initState() {
     super.initState();
     usuario = UsuarioModel();
+    _cargarIndex();
 
     tabs = [
       ProductList(),
-      UnderConstruction(),
       ProductListVendedor(),
-      UnderConstruction(),
       UnderConstruction(),
       UsuarioInfo(),
     ];
+  }
+
+  _cargarIndex() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      if (prefs.getInt("index") != null) {
+        _currentIndex = prefs.getInt("index")!;
+        prefs.remove('index');
+      } else {
+        _currentIndex = prefs.getInt("indexMe") ?? 0;
+        prefs.remove('indexMe');
+      }
+    });
   }
 
   @override
@@ -56,16 +69,8 @@ class RootAppState extends State<RootApp> {
             backgroundColor: Color.fromARGB(255, 0, 0, 0),
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.storefront_rounded),
-              label: "Purchase",
-              backgroundColor: Color.fromARGB(255, 0, 0, 0)),
-          BottomNavigationBarItem(
               icon: Icon(Icons.monetization_on_sharp),
               label: "To Sell",
-              backgroundColor: Color.fromARGB(255, 0, 0, 0)),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.category),
-              label: "Categories",
               backgroundColor: Color.fromARGB(255, 0, 0, 0)),
           BottomNavigationBarItem(
               icon: Icon(Icons.chat_bubble_rounded),

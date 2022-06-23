@@ -3,6 +3,7 @@ import 'package:bazatlima/loginPage.dart';
 import 'package:bazatlima/producto_add_edit.dart';
 import 'package:bazatlima/signUpPage.dart';
 import 'package:bazatlima/underConstruction.dart';
+import 'package:bazatlima/usuarioInfo.dart';
 import 'package:bazatlima/vendedor/producto_list_vendedor.dart';
 import 'package:bazatlima/rootApp.dart';
 import 'package:bazatlima/vistaProducto.dart';
@@ -30,6 +31,8 @@ class MyApp extends StatelessWidget {
         '/signUpPage': (context) => SignUpPage(),
         '/view-product': (context) => const VistaProducto(),
         '/view-user': (context) => const VistaUsuario(),
+        '/user-info': (context) => const UsuarioInfo(),
+        '/list-vendedor': (context) => const ProductListVendedor(),
         '/add-product': (context) => const ProdductAddEdit(),
         '/edit-product': (context) => const ProdductAddEdit(),
       },

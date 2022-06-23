@@ -2,15 +2,15 @@ List<CalificacionModel> calificacionFromJson(dynamic str) =>
     List<CalificacionModel>.from(
         (str).map((x) => CalificacionModel.fromJson(x)));
 
-int estrellasFromJson(json) {
-  var promedio = json["estrellasPromedio"];
-  return promedio;
-}
+// double estrellasFromJson(Map<dynamic, dynamic> json) {
+//   var promedio = double.parse(json["estrellasPromedio"]);
+//   return promedio;
+// }
 
 class CalificacionModel {
   late int? idUsuarioCalificado;
   late int? idUsuarioCalificador;
-  late int? estrellas;
+  late dynamic? estrellas;
   late String? comentario;
 
   CalificacionModel(this.idUsuarioCalificado, this.idUsuarioCalificador,

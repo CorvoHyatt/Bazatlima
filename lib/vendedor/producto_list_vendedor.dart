@@ -20,7 +20,8 @@ class _ProductListVendedorState extends State<ProductListVendedor> {
     super.initState();
   }
 
-  Widget productListVendedor(productos) {
+  Widget productListVendedor(List<ProductoModel>? productos) {
+    List<ProductoModel> products = productos!.reversed.toList();
     return SingleChildScrollView(
         child: Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8),
@@ -35,10 +36,10 @@ class _ProductListVendedorState extends State<ProductListVendedor> {
                 shrinkWrap: true,
                 physics: const ClampingScrollPhysics(),
                 scrollDirection: Axis.vertical,
-                itemCount: productos.length,
+                itemCount: products.length,
                 itemBuilder: (context, index) {
                   return ProductoItemVendedor(
-                    model: productos[index],
+                    model: products[index],
                     onDelete: (ProductoModel model) {
                       setState(() {});
                       APIService.deleteProducto(model.idProducto)

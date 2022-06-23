@@ -8,7 +8,7 @@ class CarritoModel {
   CarritoModel({this.idUsuario, this.idProducto});
 
   CarritoModel.fromJson(Map<String, dynamic> json) {
-    idUsuario = json["idProducto"];
+    idUsuario = json["idUsuario"];
     idProducto = json["idProducto"];
   }
 

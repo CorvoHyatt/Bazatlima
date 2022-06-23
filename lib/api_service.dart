@@ -48,23 +48,39 @@ class APIService {
     } else {
       productoURL = "$productoURL/create";
     }
-
     var url = Uri.http(Config.apiURL, productoURL);
 
     var requestMethod = isEditMode ? "PUT" : "POST";
     Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
-
+    var data;
     if (requestMethod == "POST") {
-      var data = jsonEncode({
+      data = jsonEncode({
         'nombreProducto': model.nombreProducto,
         'precio': model.precio,
         'descripcion': model.descripcion,
         'idCategoria': model.idCategoria,
         'idUsuario': 2,
-        'imagen': model.imagen ?? ""
+        'imagen':
+            "https://www.salonsale.com.mx/admin/productos/default.jpg" // Aquí va model.imagen
       });
       var response =
           await client.post(url, headers: requestHeaders, body: data);
+      if (response.statusCode == 200) {
+        return true;
+      }
+    }
+
+    if (requestMethod == "PUT") {
+      data = jsonEncode({
+        'nombreProducto': model.nombreProducto,
+        'precio': model.precio,
+        'descripcion': model.descripcion,
+        'idCategoria': model.idCategoria,
+        'idUsuario': 2,
+        'imagen': model.imagen
+        //Aquí va model.imagen
+      });
+      var response = await client.put(url, headers: requestHeaders, body: data);
       if (response.statusCode == 200) {
         return true;
       }
@@ -108,49 +124,44 @@ class APIService {
     var response = await client.get(url, headers: requestHeaders);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
+      print(data["data"]);
       return calificacionFromJson(data["data"]);
     } else {
       return null;
     }
   }
 
-  static Future<int?> getEstrellas(idUsuario) async {
+  static Future<double?> getEstrellas(idUsuario) async {
     Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
     var calificacionURL = "${Config.calificacionURL}/average/$idUsuario";
     var url = Uri.http(Config.apiURL, calificacionURL);
     var response = await client.get(url, headers: requestHeaders);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      return estrellasFromJson(data["data"]);
+      return (double.parse(data["data"]["estrellasPromedio"].toString()));
     } else {
       return null;
     }
   }
 
-  static Future<bool> saveCalificacion(
-    CalificacionModel model,
-    bool isEditMode,
-  ) async {
+  static Future<bool> saveCalificacion(CalificacionModel model) async {
     var calificacionURL = "${Config.calificacionURL}/create";
     var url = Uri.http(Config.apiURL, calificacionURL);
+    Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
 
-    var requestMethod = "POST";
+    var data;
 
-    var request = http.MultipartRequest(requestMethod, url);
-
-    request.fields["idUsuarioCalificado"] =
-        model.idUsuarioCalificado!.toString();
-    request.fields["idUsuarioCalificador"] =
-        model.idUsuarioCalificador!.toString();
-    request.fields["estrellas"] = model.estrellas!.toString();
-    request.fields["comentario"] = model.comentario!;
-
-    var response = await request.send();
+    data = jsonEncode({
+      'comentario': model.comentario,
+      'estrellas': model.estrellas,
+      'idUsuarioCalificado': model.idUsuarioCalificado,
+      'idUsuarioCalificador': model.idUsuarioCalificador,
+    });
+    var response = await client.post(url, headers: requestHeaders, body: data);
     if (response.statusCode == 200) {
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   // ---------------- Usuario ----------------
@@ -170,6 +181,26 @@ class APIService {
     } else {
       return -1;
     }
+  }
+
+  static Future<bool> updateUsuario(UsuarioModel usuario) async {
+    var usuarioURL = Config.usuariosURL;
+    usuarioURL = "$usuarioURL/update/${usuario.idUsuario}";
+    Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
+    var url = Uri.http(Config.apiURL, usuarioURL);
+    var data = jsonEncode({
+      'nombreUsuario': usuario.nombreUsuario,
+      'telefono': usuario.telefono,
+      'correo': usuario.correo,
+      'password': usuario.password,
+      'rol': usuario.rol,
+      'imagen': usuario.imagen
+    });
+    var response = await client.put(url, headers: requestHeaders, body: data);
+    if (response.statusCode == 200) {
+      return true;
+    }
+    return false;
   }
 
   static Future<UsuarioModel?> getUsuario(int? idUsuario) async {

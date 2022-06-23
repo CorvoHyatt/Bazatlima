@@ -122,6 +122,7 @@ class _VistaProductoState extends State<VistaProducto> {
                 child: TextButton(
                   style: ButtonStyle(),
                   onPressed: () {
+                    print(usuarioVendedor);
                     Navigator.pushNamed(context, "/view-user",
                         arguments: {'usuario': usuarioVendedor});
                   },
@@ -149,7 +150,7 @@ class _VistaProductoState extends State<VistaProducto> {
                   ),
                 ),
               ),
-              (model!.estadoProducto == null)
+              (model!.estadoProducto == 1)
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.center,

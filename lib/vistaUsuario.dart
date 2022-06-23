@@ -1,6 +1,11 @@
+import 'package:bazatlima/Models/calificacion_model.dart';
 import 'package:bazatlima/Models/usuario_model.dart';
 import 'package:flutter/material.dart';
 import 'package:rating_dialog/rating_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smooth_star_rating/smooth_star_rating.dart';
+
+import 'api_service.dart';
 
 class VistaUsuario extends StatefulWidget {
   const VistaUsuario({Key? key}) : super(key: key);
@@ -12,6 +17,7 @@ class VistaUsuario extends StatefulWidget {
 class _VistaUsuarioState extends State<VistaUsuario> {
   UsuarioModel? usuario;
   double rating = 4.0;
+  int? idUsuarioCalicador;
   @override
   void initState() {
     super.initState();
@@ -165,15 +171,155 @@ class _VistaUsuarioState extends State<VistaUsuario> {
                                   color: Colors.amber,
                                 ),
                                 submitButtonText: "Enviar",
-                                onSubmitted: (response) {});
+                                onSubmitted: (response) async {
+                                  SharedPreferences prefs =
+                                      await SharedPreferences.getInstance();
+                                  idUsuarioCalicador =
+                                      prefs.getInt("idUsuario");
+                                  CalificacionModel cal = CalificacionModel(
+                                      usuario?.idUsuario,
+                                      idUsuarioCalicador,
+                                      rating.round(),
+                                      response.comment);
+                                  APIService.saveCalificacion(cal)
+                                      .then((respons) {
+                                    if (respons) {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                                actionsAlignment:
+                                                    MainAxisAlignment.center,
+                                                title: Icon(
+                                                  Icons.check,
+                                                  color: Colors.green,
+                                                  size: 50,
+                                                ),
+                                                actions: [
+                                                  ElevatedButton(
+                                                      style: ButtonStyle(
+                                                          backgroundColor:
+                                                              MaterialStateProperty
+                                                                  .all(Colors
+                                                                      .amber)),
+                                                      onPressed: () {
+                                                        prefs.setInt(
+                                                            'index', 1);
+
+                                                        Navigator.popUntil(
+                                                            context,
+                                                            ModalRoute.withName(
+                                                                '/view-user'));
+                                                      },
+                                                      child: Text(
+                                                        "Ok",
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black),
+                                                      ))
+                                                ],
+                                                content: Text(
+                                                  "Comentario enviado!",
+                                                  style: TextStyle(
+                                                      color: Colors.amber),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                backgroundColor: Colors.white,
+                                              ));
+                                    } else {
+                                      // FormHelper.showSimpleAlertDialog(
+                                      //     context, Config.appName, "Error Ocurred", "Ok", () {
+                                      //   Navigator.of(context).pop();
+                                      // });
+                                    }
+                                  });
+                                });
                           });
                     },
                     child: Text("Calificar Usuario")),
-              )
+              ),
+              loadCalificacion(context),
+              // loadCalificacion(context),
             ]),
       ),
     );
   }
 
-  void showRating() {}
+  Widget rate3(double? rate) {
+    print(rate);
+    return rate != -1
+        ? Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: SmoothStarRating(
+                  color: Colors.amber,
+                  borderColor: Colors.black,
+                  rating: rate ?? 0,
+                  allowHalfRating: true,
+                  isReadOnly: true,
+                  size: 35,
+                  spacing: 8,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 20),
+                child: Center(
+                  child: Text(
+                    "Rating",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+              )
+            ],
+          )
+        : Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: SmoothStarRating(
+                  color: Colors.amber,
+                  borderColor: Colors.black,
+                  rating: 0,
+                  allowHalfRating: true,
+                  isReadOnly: true,
+                  size: 35,
+                  spacing: 8,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 20),
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      "Aun no tiene una calificación este usuario :(",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          );
+  }
+
+  Widget loadCalificacion(context) {
+    if (usuario?.idUsuario == null) {
+      return loadCalificacion(context);
+    }
+    return FutureBuilder(
+      future: APIService.getEstrellas(usuario?.idUsuario),
+      builder: (BuildContext context, AsyncSnapshot<double?> rate) {
+        if (rate.hasData) {
+          print(rate.data);
+          return rate3(rate.data);
+        }
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  }
 }
