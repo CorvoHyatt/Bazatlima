@@ -107,7 +107,7 @@ class _VistaProductoState extends State<VistaProducto> {
                   padding: const EdgeInsets.only(top: 20, left: 30, right: 30),
                   child: Center(
                     child: Text(
-                      textAlign: TextAlign.justify,
+                      textAlign: TextAlign.center,
                       model!.nombreProducto!,
                       style:
                           TextStyle(fontSize: 30, fontWeight: FontWeight.w500),
@@ -117,27 +117,29 @@ class _VistaProductoState extends State<VistaProducto> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 40),
-                child: TextButton(
-                  style: ButtonStyle(),
-                  onPressed: () {
-                    print(usuarioVendedor);
-                    Navigator.pushNamed(context, "/view-user",
-                        arguments: {'usuario': usuarioVendedor});
-                  },
-                  child: Text("Por ${usuarioVendedor.nombreUsuario!}",
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black54)),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 0),
+                  child: TextButton(
+                    style: ButtonStyle(),
+                    onPressed: () {
+                      print(usuarioVendedor);
+                      Navigator.pushNamed(context, "/view-user",
+                          arguments: {'usuario': usuarioVendedor});
+                    },
+                    child: Text("Por ${usuarioVendedor.nombreUsuario!}",
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black54)),
+                  ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 0.0),
                 child: Center(
                   child: Container(
-                    decoration: BoxDecoration(color: Colors.grey[200]),
+                    decoration: BoxDecoration(color: Colors.white),
                     child: SizedBox(
                       height: 300,
                       width: 300,

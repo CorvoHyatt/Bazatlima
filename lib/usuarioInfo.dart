@@ -65,7 +65,7 @@ class _UsuarioInfoState extends State<UsuarioInfo> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 30.0),
+            padding: const EdgeInsets.only(top: 15.0),
             child: Center(
               child: Container(
                 decoration: BoxDecoration(color: Colors.grey[200]),
@@ -243,7 +243,7 @@ class _UsuarioInfoState extends State<UsuarioInfo> {
                                                                 .center,
                                                           ),
                                                           backgroundColor:
-                                                              Colors.white,
+                                                              Colors.black,
                                                         ));
                                               } else {
                                                 FormHelper

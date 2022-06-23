@@ -53,7 +53,7 @@ class ProductoItemVendedor extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.only(top: 20, right: 20),
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,6 +82,7 @@ class ProductoItemVendedor extends StatelessWidget {
                         ),
                         Text(
                           model!.descripcion!,
+                          textAlign: TextAlign.justify,
                           style: const TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.normal,

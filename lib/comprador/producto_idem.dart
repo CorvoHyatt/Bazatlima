@@ -10,14 +10,18 @@ class ProductoItem extends StatelessWidget {
     return Center(
       child: Card(
         elevation: 0,
-        margin: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 5.0),
-        child: Container(
-            width: MediaQuery.of(context).size.width - 20,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: productWidget(context)),
+        margin: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+              width: MediaQuery.of(context).size.width - 20,
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: productWidget(context)),
+        ),
       ),
     );
   }
@@ -29,7 +33,7 @@ class ProductoItem extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 width: 120,
@@ -79,7 +83,7 @@ class ProductoItem extends StatelessWidget {
                               color: Colors.black54,
                               fontWeight: FontWeight.normal,
                               fontSize: 14),
-                          maxLines: 3,
+                          maxLines: 4,
                           overflow: TextOverflow.fade,
                         ),
                         const SizedBox(

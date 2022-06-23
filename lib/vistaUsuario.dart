@@ -108,7 +108,7 @@ class _VistaUsuarioState extends State<VistaUsuario> {
                     ),
                   )),
               Padding(
-                padding: const EdgeInsets.only(top: 10.0),
+                padding: const EdgeInsets.only(top: 10),
                 child: Center(
                   child: Container(
                     decoration: BoxDecoration(color: Colors.grey[200]),

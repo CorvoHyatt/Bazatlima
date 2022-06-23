@@ -18,6 +18,7 @@ class APIService {
     var response = await client.get(url, headers: requestHeaders);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
+      print(data["data"]);
       return productosFromJson(data["data"]);
     } else {
       return null;
@@ -138,7 +139,7 @@ class APIService {
     var response = await client.get(url, headers: requestHeaders);
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      return (double.parse(data["data"]["estrellasPromedio"].toString()));
+      return (double.parse((data["data"]["estrellasPromedio"].toString())));
     } else {
       return null;
     }
@@ -165,6 +166,29 @@ class APIService {
   }
 
   // ---------------- Usuario ----------------
+
+  static Future<int> agregarUsuario(UsuarioModel? usuario) async {
+    var usuarioURL = Config.usuariosURL;
+    usuarioURL = "$usuarioURL/create";
+    Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
+    var url = Uri.http(Config.apiURL, usuarioURL);
+    var data = jsonEncode({
+      'nombreUsuario': usuario?.nombreUsuario,
+      'telefono': usuario?.telefono,
+      'correo': usuario?.correo,
+      'password': usuario?.password,
+      'rol': 0,
+      'imagen':
+          "https://icons.veryicon.com/png/o/avatar/user-2/skull-line-1.png"
+    });
+    var response = await client.post(url, headers: requestHeaders, body: data);
+    if (response.statusCode == 200) {
+      var resp = jsonDecode(response.body);
+      return resp;
+    }
+    return -1;
+  }
+
   static Future<dynamic> exist(correo, password) async {
     Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
     var usuarioURL = "${Config.usuariosURL}/exists";

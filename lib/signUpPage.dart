@@ -1,11 +1,22 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, duplicate_ignore, file_names
 
+import 'package:bazatlima/Models/usuario_model.dart';
+import 'package:bazatlima/api_service.dart';
 import 'package:bazatlima/rootApp.dart';
 import 'package:flutter/material.dart';
 import 'package:bazatlima/loginPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 
-// ignore: use_key_in_widget_constructors
+///
+/// [ignore: use_key_in_widget_constructors]
+///
+/// [@author	Unknown]
+/// [ @since	v0.0.1 ]
+/// [@version	v1.0.0	Thursday, June 23rd, 2022]
+/// [@see		StatefulWidget]
+/// [@global]
+///
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
 
@@ -15,6 +26,15 @@ class SignUpPage extends StatefulWidget {
 
 class StartState extends State<SignUpPage> {
   static final GlobalKey<FormState> globalKey = GlobalKey<FormState>();
+  String? password;
+  UsuarioModel? usuario;
+
+  @override
+  void initState() {
+    super.initState();
+
+    usuario = UsuarioModel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,16 +89,18 @@ class StartState extends State<SignUpPage> {
                 ),
               )),
           Container(
-              padding: EdgeInsets.only(top: 40),
+              padding: EdgeInsets.only(top: 60),
               child: FormHelper.inputFieldWidget(context, "correo", "Correo",
                   (onValidate) {
                 if (onValidate.isEmpty) {
                   return 'Ingrese un correo';
                 }
-              }, (onSavedVal) {},
+              }, (onSavedVal) {
+                usuario?.correo = onSavedVal;
+              },
                   isMultiline: false,
                   multilineRows: 1,
-                  initialValue: "",
+                  initialValue: "Correo@gmail.com",
                   borderColor: Colors.black,
                   borderFocusColor: Colors.black,
                   textColor: Colors.black,
@@ -90,14 +112,16 @@ class StartState extends State<SignUpPage> {
           Container(
               padding: EdgeInsets.only(top: 20),
               child: FormHelper.inputFieldWidget(
-                  context, "correo", "Nombre y apellidos", (onValidate) {
+                  context, "Nombre", "Nombre y apellidos", (onValidate) {
                 if (onValidate.isEmpty) {
                   return 'Ingrese un su nombre y apellidos';
                 }
-              }, (onSavedVal) {},
+              }, (onSavedVal) {
+                usuario?.nombreUsuario = onSavedVal;
+              },
                   isMultiline: false,
                   multilineRows: 1,
-                  initialValue: "",
+                  initialValue: "Laura Alvarez Guevara",
                   borderColor: Colors.black,
                   borderFocusColor: Colors.black,
                   textColor: Colors.black,
@@ -113,11 +137,12 @@ class StartState extends State<SignUpPage> {
                 if (onValidate.isEmpty) {
                   return 'Ingrese una contraseña';
                 }
+                password = onValidate;
               }, (onSavedVal) {},
                   obscureText: true,
                   isMultiline: false,
                   multilineRows: 1,
-                  initialValue: "",
+                  initialValue: "1234",
                   borderColor: Colors.black,
                   borderFocusColor: Colors.black,
                   textColor: Colors.black,
@@ -133,12 +158,16 @@ class StartState extends State<SignUpPage> {
                   (onValidate) {
                 if (onValidate.isEmpty) {
                   return 'Confirme la contraseña';
+                } else if (password != onValidate) {
+                  return 'Las contraseñas deben coincidir';
                 }
-              }, (onSavedVal) {},
+              }, (onSavedVal) {
+                usuario?.password = onSavedVal;
+              },
                   obscureText: true,
                   isMultiline: false,
                   multilineRows: 1,
-                  initialValue: "",
+                  initialValue: "1234",
                   borderColor: Colors.black,
                   borderFocusColor: Colors.black,
                   textColor: Colors.black,
@@ -148,6 +177,28 @@ class StartState extends State<SignUpPage> {
                   prefixIcon: Icon(Icons.password),
                   prefixIconColor: Colors.black)),
           Container(
+              padding: EdgeInsets.only(top: 20),
+              child: FormHelper.inputFieldWidget(
+                  context, "Teléfono", "Télefono", (onValidate) {
+                if (onValidate.isEmpty) {
+                  return 'Ingrese un número de teléfono';
+                }
+              }, (onSavedVal) {
+                usuario?.telefono = onSavedVal;
+              },
+                  isNumeric: true,
+                  isMultiline: false,
+                  multilineRows: 1,
+                  initialValue: "4492651758",
+                  borderColor: Colors.black,
+                  borderFocusColor: Colors.black,
+                  textColor: Colors.black,
+                  hintColor: Colors.black.withOpacity(.7),
+                  borderRadius: 10,
+                  showPrefixIcon: true,
+                  prefixIcon: Icon(Icons.phone),
+                  prefixIconColor: Colors.black)),
+          Container(
             margin: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
             alignment: Alignment.centerRight,
             child: GestureDetector(
@@ -155,30 +206,50 @@ class StartState extends State<SignUpPage> {
               child: Text("¿Olvidaste tu contraseña?"),
             ),
           ),
-          Center(
-            child: FormHelper.submitButton("Registrate",
-                btnColor: Colors.black,
-                borderColor: Colors.black,
-                width: 300,
-                fontSize: 20, () {
-              if (validateAndSave()) {
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext contexto) => AlertDialog(
-                          title: Text("Bienvenido"),
-                          content: Text("Registro exitoso!"),
-                          actions: [
-                            TextButton(
-                                onPressed: () {
-                                  Navigator.popAndPushNamed(
-                                      context, "/rootApp");
-                                },
-                                child: Text("Ok")),
-                          ],
-                        ));
-              }
-            }),
+          Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Center(
+              child: FormHelper.submitButton("Registrate",
+                  btnColor: Colors.black,
+                  borderColor: Colors.black,
+                  width: 300,
+                  fontSize: 20, () async {
+                if (validateAndSave()) {
+                  print("nombre: ${usuario?.nombreUsuario}");
+                  print("telefono: ${usuario?.telefono}");
+                  print("contraseña: ${usuario?.password}");
+                  print("correo: ${usuario?.correo}");
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+
+                  APIService.agregarUsuario(usuario).then((response) {
+                    if (response != -1) {
+                      prefs.setInt('idUsuario', response);
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext contexto) => AlertDialog(
+                                title: Text("Bienvenido"),
+                                content: Text("Registro exitoso!"),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.popAndPushNamed(
+                                            context, "/rootApp");
+                                      },
+                                      child: Text("Ok")),
+                                ],
+                              ));
+                    } else {
+                      FormHelper.showSimpleAlertDialog(
+                          context, "Error", "Algo Salio mal", "Ok", () {
+                        Navigator.of(context).pop();
+                      });
+                    }
+                  });
+                }
+              }),
+            ),
           ),
           Container(
             margin: EdgeInsets.only(top: 20),

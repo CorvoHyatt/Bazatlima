@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:bazatlima/signUpPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
-
 import 'api_service.dart';
 import 'config.dart';
 
@@ -77,7 +76,7 @@ class StartState extends State<LoginPage> {
               ),
             )),
         Container(
-            padding: EdgeInsets.only(top: 30),
+            padding: EdgeInsets.only(top: 60),
             child: FormHelper.inputFieldWidget(context, "correo", "Correo",
                 (onValidate) {
               if (onValidate.isEmpty) {
@@ -127,31 +126,28 @@ class StartState extends State<LoginPage> {
             child: Text("¿Olvidaste tu contraseña?"),
           ),
         ),
-        Center(
-          child: FormHelper.submitButton("Logearte",
-              btnColor: Colors.black,
-              borderColor: Colors.black,
-              width: 300,
-              fontSize: 20, () async {
-            if (validateAndSave()) {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              APIService.exist(correo, password).then((response) {
-                if (response != -1) {
-                  //Guardar en local el id del usuario
-                  prefs.setInt('idUsuario', response.idUsuario);
-                  Navigator.popAndPushNamed(context, "/rootApp");
-                } else {
-                  FormHelper.showSimpleAlertDialog(
-                      context,
-                      "Credenciales no validas",
-                      "Intente nuevamente con credenciales correctas",
-                      "Ok", () {
-                    Navigator.of(context).pop();
-                  });
-                }
-              });
-            }
-          }),
+        Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: Center(
+            child: FormHelper.submitButton("Iniciar Sesión",
+                btnColor: Colors.black,
+                borderColor: Colors.black,
+                width: 300,
+                fontSize: 20, () async {
+              if (validateAndSave()) {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                APIService.exist(correo, password).then((response) {
+                  if (response != -1) {
+                    //Guardar en local el id del usuario
+                    prefs.setInt('idUsuario', response.idUsuario);
+                    Navigator.popAndPushNamed(context, "/rootApp");
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                });
+              }
+            }),
+          ),
         ),
         Container(
           margin: EdgeInsets.only(top: 20),
