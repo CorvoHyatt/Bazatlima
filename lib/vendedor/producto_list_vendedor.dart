@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bazatlima/Models/producto_model.dart';
 import 'package:bazatlima/vendedor/producto_item_vendedor.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 
 import '../api_service.dart';
@@ -14,7 +15,8 @@ class ProductListVendedor extends StatefulWidget {
 
 class _ProductListVendedorState extends State<ProductListVendedor> {
   List<ProductoModel> productos = List<ProductoModel>.empty(growable: true);
-  int _currentIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int? idUsuario;
   @override
   void initState() {
     super.initState();
@@ -30,29 +32,67 @@ class _ProductListVendedorState extends State<ProductListVendedor> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const ClampingScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  return ProductoItemVendedor(
-                    model: products[index],
-                    onDelete: (ProductoModel model) {
-                      setState(() {});
-                      APIService.deleteProducto(model.idProducto)
-                          .then((response) {
-                        return FormHelper.showSimpleAlertDialog(
-                            context, "Alerta", "Producto eliminado", "Ok", () {
-                          Navigator.of(context).pop();
-                        });
-                      });
-                    },
-                  );
-                },
-              )
+              products.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 180.0),
+                      child: Center(
+                        child: Container(
+                          height: 200,
+                          width: MediaQuery.of(context).size.width * 0.90,
+                          decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(30)),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 12.0, left: 10, right: 10),
+                            child: Text(
+                              "Parece que aún no tienes productos :( \n\n\nAgrega tú primer producto en el botón con signo + :)",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.amber,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      itemCount: products.length,
+                      itemBuilder: (BuildContext ctx, index) {
+                        return ProductoItemVendedor(
+                          model: products[index],
+                          onDelete: (ProductoModel model) {
+                            setState(() {});
+                            APIService.deleteProducto(model.idProducto)
+                                .then((response) {
+                              if (response) {
+                                return FormHelper.showSimpleAlertDialog(
+                                    ctx, "Exito!", "Producto eliminado", "Ok",
+                                    () {
+                                  Navigator.popUntil(ctx,
+                                      ModalRoute.withName('/list-vendedor'));
+                                });
+                              } else {
+                                return FormHelper.showSimpleAlertDialog(
+                                    ctx,
+                                    "Error!",
+                                    "Algo inesperado ocurrio",
+                                    "Ok", () {
+                                  Navigator.popUntil(ctx,
+                                      ModalRoute.withName('/list-vendedor'));
+                                });
+                              }
+                            });
+                          },
+                        );
+                      },
+                    )
             ],
           )
         ],
@@ -63,6 +103,7 @@ class _ProductListVendedorState extends State<ProductListVendedor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Center(
             child: Text(
@@ -84,7 +125,7 @@ class _ProductListVendedorState extends State<ProductListVendedor> {
         ),
       ),
       backgroundColor: Colors.grey[300],
-      body: loadProducts(),
+      body: loadId(idUsuario),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.pushNamed(context, "/add-product");
@@ -98,9 +139,30 @@ class _ProductListVendedorState extends State<ProductListVendedor> {
     );
   }
 
-  Widget loadProducts() {
+  Widget loadId(idUsuario) {
     return FutureBuilder(
-      future: APIService.getProductos(),
+      future: Future<int>.delayed(Duration.zero, (() async {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        int id = prefs.getInt("idUsuario") ?? 0;
+        return id;
+      })),
+      builder: (BuildContext context, AsyncSnapshot<int?> idusuario) {
+        if (idusuario.hasData) {
+          print("idUsuario: ${idusuario.data}");
+          idUsuario = idusuario.data;
+          return loadProducts(idUsuario);
+        }
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  }
+
+  Widget loadProducts(idUsuario) {
+    print("load: $idUsuario");
+    return FutureBuilder(
+      future: APIService.getProductosById(idUsuario),
       builder: (
         BuildContext context,
         AsyncSnapshot<List<ProductoModel>?> model,

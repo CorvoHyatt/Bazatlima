@@ -51,6 +51,17 @@ class _ProductListState extends State<ProductList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, "/carrito");
+        },
+        backgroundColor: Colors.black,
+        tooltip: "Carrito",
+        child: Icon(
+          Icons.shopping_cart,
+          color: Colors.amber,
+        ),
+      ),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
@@ -72,20 +83,15 @@ class _ProductListState extends State<ProductList> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(0),
-                child: TextField(
-                  cursorColor: Color.fromARGB(255, 202, 191, 34),
-                  decoration: InputDecoration(
-                      fillColor: Colors.white,
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(255, 202, 191, 34)),
-                      ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      icon: Icon(
+                child: TextButton(
+                  onPressed: () {
+                    showSearch(context: context, delegate: Search());
+                  },
+                  child: Container(
+                      alignment: Alignment.centerLeft,
+                      child: Icon(
                         Icons.search,
-                        color: (Color.fromARGB(255, 0, 0, 0)),
+                        color: Colors.black,
                       )),
                 ),
               ),

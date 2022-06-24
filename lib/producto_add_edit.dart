@@ -28,6 +28,7 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
   ProductoModel? productoModel;
   bool isEditMode = false;
   bool isImageSelected = false;
+  int? idUsuario;
 
   @override
   void initState() {
@@ -45,7 +46,7 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
     categorias.add({'idCategoria': "8", 'categoria': "Papelería"});
     categorias.add({'idCategoria': "9", 'categoria': "Computación"});
     productoModel = ProductoModel();
-
+    _cargarId();
     Future.delayed(Duration.zero, (() {
       if (ModalRoute.of(context)?.settings.arguments != null) {
         final Map arguments = (ModalRoute.of(context)?.settings.arguments)
@@ -57,6 +58,13 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
         });
       }
     }));
+  }
+
+  _cargarId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      idUsuario = prefs.getInt("idUsuario") ?? 0;
+    });
   }
 
   @override
@@ -310,7 +318,8 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
           if (validateAndSave()) {
             setState((() => state = ButtonState.loading));
             SharedPreferences prefs = await SharedPreferences.getInstance();
-            APIService.saveProducto(productoModel!, isEditMode, isImageSelected)
+            APIService.saveProducto(
+                    idUsuario, productoModel!, isEditMode, isImageSelected)
                 .then((response) {
               if (response) {
                 showDialog(
@@ -342,11 +351,17 @@ class _ProdductAddEditState extends State<ProdductAddEdit> {
                                   style: TextStyle(color: Colors.black),
                                 ))
                           ],
-                          content: Text(
-                            "Producto agregado con exito",
-                            style: TextStyle(color: Colors.black),
-                            textAlign: TextAlign.center,
-                          ),
+                          content: isEditMode
+                              ? Text(
+                                  "Producto editado con exito",
+                                  style: TextStyle(color: Colors.black),
+                                  textAlign: TextAlign.center,
+                                )
+                              : Text(
+                                  "Producto agregado con exito",
+                                  style: TextStyle(color: Colors.black),
+                                  textAlign: TextAlign.center,
+                                ),
                           backgroundColor: Colors.white,
                         ));
               } else {

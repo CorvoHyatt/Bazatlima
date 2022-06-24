@@ -1,6 +1,9 @@
+//--no-sound-null-safety
+
 import 'package:bazatlima/comprador/producto_list.dart';
 import 'package:bazatlima/loginPage.dart';
 import 'package:bazatlima/producto_add_edit.dart';
+import 'package:bazatlima/search.dart';
 import 'package:bazatlima/signUpPage.dart';
 import 'package:bazatlima/underConstruction.dart';
 import 'package:bazatlima/usuarioInfo.dart';
@@ -11,6 +14,8 @@ import 'package:bazatlima/vistaUsuario.dart';
 import 'package:flutter/material.dart';
 import 'package:bazatlima/splashPage.dart';
 import 'package:flutter/services.dart';
+
+import 'carrito.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/list-vendedor': (context) => const ProductListVendedor(),
         '/add-product': (context) => const ProdductAddEdit(),
         '/edit-product': (context) => const ProdductAddEdit(),
+        '/carrito': (context) => const Carrito(),
       },
     );
   }

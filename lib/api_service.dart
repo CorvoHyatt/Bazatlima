@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'dart:convert';
 import 'package:bazatlima/Models/calificacion_model.dart';
+import 'package:bazatlima/Models/carrito_model.dart';
 import 'package:bazatlima/Models/categoria_model.dart';
 import 'package:bazatlima/Models/producto_model.dart';
 import 'package:http/http.dart' as http;
@@ -14,6 +15,56 @@ class APIService {
   static Future<List<ProductoModel>?> getProductos() async {
     Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
     var url = Uri.http(Config.apiURL, Config.productoURL);
+
+    var response = await client.get(url, headers: requestHeaders);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      print(data["data"]);
+      return productosFromJson(data["data"]);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<List<ProductoModel>?> getProductosBySearch(
+      String busqueda) async {
+    Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
+    var urL = "${Config.productoURL}/getProductosByBusqueda";
+    var url = Uri.http(Config.apiURL, urL);
+    var data = jsonEncode({
+      'producto': busqueda,
+    });
+    var response = await client.post(url, headers: requestHeaders, body: data);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      print(data["data"]);
+      return productosFromJson(data["data"]);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<List<ProductoModel>?> getProductosById(int? idUsuario) async {
+    Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
+    var urL = "${Config.productoURL}/getProductosByUsuario/$idUsuario";
+    var url = Uri.http(Config.apiURL, urL);
+
+    var response = await client.get(url, headers: requestHeaders);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      print(data["data"]);
+      return productosFromJson(data["data"]);
+    } else {
+      return null;
+    }
+  }
+
+  static Future<List<ProductoModel>?> getProductosByCarrito(
+      int? idUsuario) async {
+    Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
+    var urL = "${Config.carritoURL}/$idUsuario";
+    print(urL);
+    var url = Uri.http(Config.apiURL, urL);
 
     var response = await client.get(url, headers: requestHeaders);
     if (response.statusCode == 200) {
@@ -39,6 +90,7 @@ class APIService {
   }
 
   static Future<bool> saveProducto(
+    int? idUsuario,
     ProductoModel model,
     bool isEditMode,
     bool isFileSelected,
@@ -60,7 +112,7 @@ class APIService {
         'precio': model.precio,
         'descripcion': model.descripcion,
         'idCategoria': model.idCategoria,
-        'idUsuario': 2,
+        'idUsuario': idUsuario,
         'imagen':
             "https://www.salonsale.com.mx/admin/productos/default.jpg" // Aquí va model.imagen
       });
@@ -77,7 +129,7 @@ class APIService {
         'precio': model.precio,
         'descripcion': model.descripcion,
         'idCategoria': model.idCategoria,
-        'idUsuario': 2,
+        'idUsuario': idUsuario,
         'imagen': model.imagen
         //Aquí va model.imagen
       });
@@ -254,6 +306,35 @@ class APIService {
       return calificacionFromJson(data["data"]);
     } else {
       return null;
+    }
+  }
+
+  static Future<bool> addProductoToCarrito(idProducto, idUsuario) async {
+    var calificacionURL = "${Config.carritoURL}/create";
+    var url = Uri.http(Config.apiURL, calificacionURL);
+    Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
+
+    var data = jsonEncode({
+      'idProducto': idProducto,
+      'idUsuario': idUsuario,
+    });
+    var response = await client.post(url, headers: requestHeaders, body: data);
+    if (response.statusCode == 200) {
+      return true;
+    }
+    return false;
+  }
+
+  static Future<bool> deleteProductoFromCarrito(productId) async {
+    Map<String, String> requestHeaders = {'Content-Type': 'application/json'};
+    // ignore: prefer_interpolation_to_compose_strings
+    var url = Uri.http(Config.apiURL, "${Config.carritoURL}/delete/$productId");
+
+    var response = await client.delete(url, headers: requestHeaders);
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'package:snippet_coder_utils/FormHelper.dart';
 
 import 'package:bazatlima/Models/producto_model.dart';
 import 'package:bazatlima/Models/usuario_model.dart';
 import 'package:bazatlima/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api_service.dart';
 
@@ -18,6 +20,7 @@ class VistaProducto extends StatefulWidget {
 class _VistaProductoState extends State<VistaProducto> {
   UsuarioModel? usuarioVendedor;
   ProductoModel? model;
+  int? idUsuario;
   @override
   void initState() {
     super.initState();
@@ -31,6 +34,14 @@ class _VistaProductoState extends State<VistaProducto> {
         setState(() {});
       }
     }));
+    _cargarId();
+  }
+
+  _cargarId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      idUsuario = prefs.getInt("idUsuario") ?? 0;
+    });
   }
 
   @override
@@ -55,6 +66,15 @@ class _VistaProductoState extends State<VistaProducto> {
   Widget cuerpo(UsuarioModel usuarioVendedor) {
     return Scaffold(
       appBar: AppBar(
+        title: Center(
+            child: Text(
+          "Información de Producto",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.amber,
+          ),
+        )),
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -62,36 +82,6 @@ class _VistaProductoState extends State<VistaProducto> {
               (Color.fromARGB(255, 0, 0, 0)),
               (Color.fromARGB(255, 57, 62, 63))
             ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-          ),
-          child: Center(
-            child: Container(
-              alignment: Alignment.bottomCenter,
-              margin: EdgeInsets.only(left: 20, right: 20, top: 45),
-              padding: EdgeInsets.only(left: 20, right: 20, bottom: 2),
-              height: 36,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
-                color: (Colors.white),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(0),
-                child: TextField(
-                  cursorColor: Colors.amber,
-                  decoration: InputDecoration(
-                      fillColor: Colors.white,
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.amber),
-                      ),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      icon: Icon(
-                        Icons.search,
-                        color: (Color.fromARGB(255, 0, 0, 0)),
-                      )),
-                ),
-              ),
-            ),
           ),
         ),
       ),
@@ -215,6 +205,50 @@ class _VistaProductoState extends State<VistaProducto> {
                 child: Text("${model!.descripcion}",
                     textAlign: TextAlign.justify,
                     style: TextStyle(color: Colors.black, fontSize: 20)),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 20),
+                child: Center(
+                    child: TextButton(
+                  onPressed: () async {
+                    APIService.addProductoToCarrito(
+                            model?.idProducto, idUsuario)
+                        .then((response) {
+                      if (response) {
+                        //Guardar en local el id del usuario
+                        return FormHelper.showSimpleAlertDialog(context,
+                            "Exito!", "Producto agregado a carrito", "Ok", () {
+                          Navigator.of(context).pop();
+                        });
+                      } else {
+                        return FormHelper.showSimpleAlertDialog(
+                            context,
+                            "Error",
+                            "Algo salio mal, intente más tarde",
+                            "Ok", () {
+                          Navigator.of(context).pop();
+                        });
+                      }
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                      shadowColor: Colors.black,
+                      backgroundColor: Colors.black,
+                      fixedSize: Size(250, 50)),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.only(right: 10.0),
+                        child: Icon(Icons.shopping_cart_checkout,
+                            color: Colors.amber),
+                      ),
+                      Text("Agregar a carrito",
+                          style: TextStyle(color: Colors.amber, fontSize: 20)),
+                    ],
+                  ),
+                )),
               )
             ],
           ),

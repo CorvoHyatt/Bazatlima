@@ -142,7 +142,13 @@ class StartState extends State<LoginPage> {
                     prefs.setInt('idUsuario', response.idUsuario);
                     Navigator.popAndPushNamed(context, "/rootApp");
                   } else {
-                    return Center(child: CircularProgressIndicator());
+                    return FormHelper.showSimpleAlertDialog(
+                        context,
+                        "Credenciales invalidas",
+                        "Intente nuevamente con credenciales validas",
+                        "Ok", () {
+                      Navigator.of(context).pop();
+                    });
                   }
                 });
               }
